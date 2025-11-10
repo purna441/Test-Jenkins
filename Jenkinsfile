@@ -5,7 +5,7 @@ pipeline {
         // Update these for your environment
         GIT_REPO = 'https://github.com/purna441/https://github.com/purna441/Test-Jenkins.git'
         SONARQUBE_SERVER = 'sonarqube'
-        SONARQUBE_TOKEN = credentials('sonar-token')
+        SONARQUBE_TOKEN = credentials('Test-Jenkins')
         NEXUS_URL = 'http://52.66.250.140/:8082/repository/maven-releases/'
         NEXUS_CREDENTIALS = credentials('nexus-credentials')
         MAVEN_HOME = tool name: 'Maven', type: 'maven'
