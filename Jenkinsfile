@@ -24,13 +24,22 @@ pipeline {
             }
         }
 
-        stage('SonarQube Analysis') {
-            steps {
-                withSonarQubeEnv("${SONARQUBE_SERVER}") {
-                    sh "${MAVEN_HOME}/bin/mvn sonar:sonar -Dsonar.login=${SONARQUBE_TOKEN}"
+        
                 }
             }
+        }stage('SonarQube Analysis') {
+    steps {
+        withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
+            sh '''
+            mvn sonar:sonar \
+              -Dsonar.projectKey=Test-Jenkins \
+              -Dsonar.host.url=https://sonarcloud.io:9000 \
+              -Dsonar.login=$SONAR_TOKEN
+            '''
         }
+    }
+}
+
 
         stage('Upload to Nexus') {
             steps {
