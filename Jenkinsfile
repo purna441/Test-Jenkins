@@ -9,44 +9,46 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main', credentialsId: 'github-credentials', url: 'https://github.com/purna441/Test-Jenkins.git'
+                git branch: 'main',
+                    url: 'https://github.com/purna441/Test-Jenkins.git',
+                    credentialsId: 'github-credentials'
             }
         }
 
         stage('Build with Maven') {
             steps {
-                sh 'mvn clean package'
+                dir('myapp') {    // 👈 Change this to the folder containing pom.xml
+                    sh 'mvn clean package'
+                }
             }
         }
 
         stage('SonarQube Analysis') {
+            when {
+                expression { currentBuild.resultIsBetterOrEqualTo('SUCCESS') }
+            }
             steps {
-                withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
-                    sh '''
-                    mvn sonar:sonar \
-                        -Dsonar.projectKey=Test-Jenkins \
-                        -Dsonar.host.url=http://<your-sonarqube-server>:9000 \
-                        -Dsonar.login=$SONAR_TOKEN
-                    '''
+                withSonarQubeEnv('SonarQubeServer') {
+                    dir('myapp') {
+                        sh 'mvn sonar:sonar'
+                    }
                 }
             }
         }
 
         stage('Deploy to Tomcat') {
             steps {
-                sh 'echo "Deploying artifact to Tomcat..."'
-                // Example if you have SSH setup:
-                // sh 'scp target/*.war ubuntu@<tomcat-server-ip>:/opt/tomcat/webapps/'
+                echo 'Deploying to Tomcat...'
             }
         }
     }
 
     post {
-        success {
-            echo '✅ Build, analysis, and deployment completed successfully!'
-        }
         failure {
             echo '❌ Build or deployment failed!'
+        }
+        success {
+            echo '✅ Build successful!'
         }
     }
 }
