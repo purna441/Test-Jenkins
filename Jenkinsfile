@@ -16,12 +16,11 @@ pipeline {
         }
 
         stage('Build with Maven') {
-            steps {
-                dir('myapp') {    // 👈 Change this to the folder containing pom.xml
-                    sh 'mvn clean package'
-                }
-            }
-        }
+    steps {
+        sh 'mvn clean package'
+    }
+}
+
 
         stage('SonarQube Analysis') {
             when {
