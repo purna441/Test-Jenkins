@@ -1,34 +1,27 @@
 pipeline {
     agent any
 
-    tools {
-        maven 'Maven'
-        jdk 'JDK17'
-    }
-
     stages {
         stage('Checkout') {
             steps {
                 git branch: 'main',
-                    url: 'https://github.com/purna441/Test-Jenkins.git',
-                    credentialsId: 'github-credentials'
+                    credentialsId: 'github-credentials',
+                    url: 'https://github.com/purna441/Test-Jenkins.git'
             }
         }
 
         stage('Build with Maven') {
-    steps {
-        sh 'mvn clean package'
-    }
-}
-
+            steps {
+                dir('myapp') {   // 👈 go into the folder containing pom.xml
+                    sh 'mvn clean package'
+                }
+            }
+        }
 
         stage('SonarQube Analysis') {
-            when {
-                expression { currentBuild.resultIsBetterOrEqualTo('SUCCESS') }
-            }
             steps {
-                withSonarQubeEnv('SonarQubeServer') {
-                    dir('myapp') {
+                dir('myapp') {
+                    withSonarQubeEnv('sonarqube') {
                         sh 'mvn sonar:sonar'
                     }
                 }
@@ -45,9 +38,6 @@ pipeline {
     post {
         failure {
             echo '❌ Build or deployment failed!'
-        }
-        success {
-            echo '✅ Build successful!'
         }
     }
 }
